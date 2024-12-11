@@ -89,9 +89,14 @@ const TaskComponent: React.FC<{
 
     return (
         <div className="bg-white shadow-md rounded-lg p-4 space-y-2">
-            <h3 className="text-lg font-semibold">{task.paperTitle}</h3>
+            {/* Task Name */}
+            <h3 className="text-lg font-semibold">{task.name}</h3>
+
+            {/* Paper Title */}
+            <p className="text-sm text-gray-500">Paper: {task.paperTitle}</p>
             <p className="text-sm text-gray-500">By: {task.authors.join(", ")}</p>
-            <div className="text-gray-700 text-sm">{task.name}</div>
+
+            {/* Tags Section */}
             <div className="flex flex-wrap gap-2 mt-2">
                 {task.tags.map((tag) => (
                     <span
@@ -112,6 +117,8 @@ const TaskComponent: React.FC<{
           </span>
                 ))}
             </div>
+
+            {/* Add Tag Section */}
             <div className="mt-2 flex items-center">
                 <input
                     type="text"
@@ -156,16 +163,14 @@ const App: React.FC = () => {
         }
     }, [selectedTags, setSearchParams]);
 
-    // Toggle tag selection
     const toggleTag = (tag: string) => {
         setSelectedTags((prevTags) =>
             prevTags.includes(tag)
-                ? prevTags.filter((t) => t !== tag) // Remove tag
-                : [...prevTags, tag] // Add tag
+                ? prevTags.filter((t) => t !== tag)
+                : [...prevTags, tag]
         );
     };
 
-    // Add a tag to a task
     const addTagToTask = (id: number, tag: string) => {
         setTasks((prevTasks) =>
             prevTasks.map((task) =>
@@ -174,7 +179,6 @@ const App: React.FC = () => {
         );
     };
 
-    // Remove a tag from a task
     const removeTagFromTask = (id: number, tag: string) => {
         setTasks((prevTasks) =>
             prevTasks.map((task) =>
@@ -185,49 +189,61 @@ const App: React.FC = () => {
         );
     };
 
-    // Save a bookmark
     const saveBookmark = () => {
-        const name = prompt("Enter a name for this bookmark:");
-        if (name) {
-            setBookmarks([...bookmarks, { name, tags: selectedTags }]);
+        const bookmarkName = prompt("Enter a name for the bookmark");
+        if (bookmarkName) {
+            setBookmarks((prevBookmarks) => [
+                ...prevBookmarks,
+                { name: bookmarkName, tags: selectedTags },
+            ]);
         }
     };
 
-    // Apply a bookmark
     const applyBookmark = (tags: string[]) => {
         setSelectedTags(tags);
     };
 
-    // Filter tasks based on the selected tags (Logical AND)
-    const filteredTasks = selectedTags.length
-        ? tasks.filter((task) =>
-            selectedTags.every((tag) => task.tags.includes(tag)) // Logical AND: task must have all selected tags
-        )
-        : tasks;
+    const clearFilters = () => {
+        setSelectedTags([]);
+    };
+
+    const filteredTasks = tasks.filter((task) =>
+        selectedTags.every((tag) => task.tags.includes(tag))
+    );
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-            {/* Active Filters (Selected Tags) */}
+        <div className="max-w-4xl mx-auto p-4">
+            {/* Filtered tags display */}
             {selectedTags.length > 0 && (
-                <div className="mb-4 flex flex-wrap gap-2">
-                    <p className="font-semibold text-gray-800">Active Filters:</p>
-                    {selectedTags.map((tag, index) => (
-                        <span
-                            key={index}
-                            className="flex items-center bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full cursor-pointer"
-                        >
-              {tag}
+                <div className="mb-4">
+                    <h3 className="font-semibold text-lg">Filtering by tags:</h3>
+                    <div className="flex flex-wrap gap-2">
+                        {selectedTags.map((tag) => (
                             <span
-                                className="ml-2 text-gray-500 hover:text-red-600"
-                                onClick={() => {
-                                    setSelectedTags(selectedTags.filter((t) => t !== tag));
-                                }}
+                                key={tag}
+                                className="flex items-center bg-gray-200 text-gray-800 text-xs font-medium px-3 py-1 rounded-full cursor-pointer"
                             >
-                ×
+                {tag}
+                                <span
+                                    className="ml-2 text-red-500 cursor-pointer"
+                                    onClick={() => setSelectedTags((prev) => prev.filter((t) => t !== tag))}
+                                >
+                  ×
+                </span>
               </span>
-            </span>
-                    ))}
+                        ))}
+                    </div>
                 </div>
+            )}
+
+            {/* Clear Filters Button */}
+            {selectedTags.length > 0 && (
+                <button
+                    onClick={clearFilters}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md mb-4 mr-2"
+                >
+                    Clear Filters
+                </button>
             )}
 
             {/* Bookmark button */}
