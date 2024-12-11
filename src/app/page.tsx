@@ -103,8 +103,8 @@ const TaskComponent: React.FC<{
                         <span
                             className="ml-2 text-gray-500 hover:text-red-600"
                             onClick={(e) => {
-                                e.stopPropagation();
-                                onRemoveTag(task.id, tag);
+                                e.stopPropagation(); // Prevent the tag click event
+                                onRemoveTag(task.id, tag); // Trigger remove tag
                             }}
                         >
               ×
@@ -198,57 +198,67 @@ const App: React.FC = () => {
         setSelectedTags(tags);
     };
 
-    // Filter tasks based on the selected tags
+    // Filter tasks based on the selected tags (Logical AND)
     const filteredTasks = selectedTags.length
         ? tasks.filter((task) =>
-            task.tags.some((tag) => selectedTags.includes(tag))
+            selectedTags.every((tag) => task.tags.includes(tag)) // Logical AND: task must have all selected tags
         )
         : tasks;
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-            {/* Bookmarks */}
-            <div className="mb-6 w-full max-w-2xl">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Bookmarks</h3>
-                <div className="flex flex-wrap gap-2">
-                    {bookmarks.map((bookmark, index) => (
-                        <button
+            {/* Active Filters (Selected Tags) */}
+            {selectedTags.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                    <p className="font-semibold text-gray-800">Active Filters:</p>
+                    {selectedTags.map((tag, index) => (
+                        <span
                             key={index}
-                            className="bg-green-100 text-green-600 text-xs font-medium px-3 py-1 rounded-full hover:bg-green-200"
-                            onClick={() => applyBookmark(bookmark.tags)}
+                            className="flex items-center bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full cursor-pointer"
                         >
-                            {bookmark.name}
-                        </button>
+              {tag}
+                            <span
+                                className="ml-2 text-gray-500 hover:text-red-600"
+                                onClick={() => {
+                                    setSelectedTags(selectedTags.filter((t) => t !== tag));
+                                }}
+                            >
+                ×
+              </span>
+            </span>
                     ))}
                 </div>
-            </div>
+            )}
 
-            {/* Selected Tags */}
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-                {selectedTags.map((tag) => (
-                    <span
-                        key={tag}
-                        className="flex items-center bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200"
-                        onClick={() => toggleTag(tag)}
-                    >
-            {tag}
-                        <span className="ml-2 text-gray-500 hover:text-red-600">×</span>
-          </span>
-                ))}
-            </div>
-
-            {/* Save Bookmark Button */}
+            {/* Bookmark button */}
             {selectedTags.length > 0 && (
                 <button
-                    className="mb-4 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
                     onClick={saveBookmark}
+                    className="bg-green-500 text-white px-4 py-2 rounded-md mb-4"
                 >
                     Save Bookmark
                 </button>
             )}
 
+            {/* Bookmarks */}
+            <div className="mb-4">
+                <h3 className="font-semibold text-lg">Bookmarks:</h3>
+                <ul>
+                    {bookmarks.map((bookmark, index) => (
+                        <li key={index} className="flex items-center gap-2">
+                            <button
+                                onClick={() => applyBookmark(bookmark.tags)}
+                                className="text-blue-600 text-sm hover:underline"
+                            >
+                                {bookmark.name}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
             {/* Task List */}
-            <div className="w-full max-w-2xl space-y-4">
+            <div className="w-full max-w-4xl space-y-4">
                 {filteredTasks.map((task) => (
                     <TaskComponent
                         key={task.id}
