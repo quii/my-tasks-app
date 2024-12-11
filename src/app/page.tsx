@@ -1,101 +1,139 @@
-import Image from "next/image";
+"use client"
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, useSearchParams } from "react-router-dom";
+import TaskComponent from "./TaskComponent";
 
-export default function Home() {
+const tasks = [
+  {
+    id: 1,
+    name: "Find and invite reviewers",
+    paperTitle: "The Impact of Climate Change on Marine Biodiversity",
+    authors: ["Dr. Jane Smith", "Dr. Michael Johnson", "Dr. Emily Davis"],
+    tags: ["reviewer selection", "urgent", "assignment"],
+    dueDate: "2024-12-15"
+  },
+  {
+    id: 2,
+    name: "Initial assessment",
+    paperTitle: "Machine Learning Approaches for Genomic Data Analysis",
+    authors: ["Dr. Alan Turing", "Dr. Grace Hopper", "Dr. Rosalind Franklin"],
+    tags: ["manuscript review", "high priority"],
+    dueDate: "2024-12-12"
+  },
+  {
+    id: 3,
+    name: "Assess recommendation",
+    paperTitle: "Advances in Quantum Computing for Material Science",
+    authors: ["Dr. Marie Curie", "Dr. Richard Feynman", "Dr. Albert Einstein"],
+    tags: ["decision making", "reject"],
+    dueDate: "2024-12-20"
+  },
+  {
+    id: 4,
+    name: "Assess recommendation",
+    paperTitle: "The Role of Gut Microbiota in Metabolic Diseases",
+    authors: ["Dr. Elizabeth Blackwell", "Dr. Jonas Salk", "Dr. Paul Ehrlich"],
+    tags: ["decision making", "accept"],
+    dueDate: "2024-12-18"
+  },
+  {
+    id: 5,
+    name: "Assess recommendation",
+    paperTitle: "Renewable Energy Storage Technologies for the Future",
+    authors: ["Dr. Nikola Tesla", "Dr. James Maxwell"],
+    tags: ["decision making", "reject"],
+    dueDate: "2024-12-21"
+  },
+  {
+    id: 6,
+    name: "Assess recommendation",
+    paperTitle: "Artificial Intelligence in Personalized Medicine",
+    authors: ["Dr. Claude Shannon", "Dr. Barbara McClintock"],
+    tags: ["decision making", "accept"],
+    dueDate: "2024-12-22"
+  },
+  {
+    id: 7,
+    name: "Communicate decision to authors",
+    paperTitle: "Novel Techniques for Early Cancer Detection",
+    authors: ["Dr. Ada Lovelace", "Dr. Charles Darwin"],
+    tags: ["communication", "authors"],
+    dueDate: "2024-12-22"
+  }
+];
+
+const App: React.FC = () => {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initialize filters from the URL on mount
+  useEffect(() => {
+    const tagsFromUrl = searchParams.get("tags");
+    if (tagsFromUrl) {
+      setSelectedTags(tagsFromUrl.split(","));
+    }
+  }, [searchParams]);
+
+  // Update the URL whenever selectedTags changes
+  useEffect(() => {
+    if (selectedTags.length > 0) {
+      setSearchParams({ tags: selectedTags.join(",") });
+    } else {
+      setSearchParams({});
+    }
+  }, [selectedTags, setSearchParams]);
+
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prevTags) =>
+        prevTags.includes(tag)
+            ? prevTags.filter((t) => t !== tag) // Remove tag
+            : [...prevTags, tag] // Add tag
+    );
+  };
+
+  // Filter tasks based on the selected tags
+  const filteredTasks = selectedTags.length
+      ? tasks.filter((task) =>
+          task.tags.some((tag) => selectedTags.includes(tag))
+      )
+      : tasks;
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+        {/* Selected Tags */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {selectedTags.map((tag) => (
+              <span
+                  key={tag}
+                  className="flex items-center bg-blue-100 text-blue-600 text-xs font-medium px-3 py-1 rounded-full cursor-pointer hover:bg-blue-200"
+                  onClick={() => toggleTag(tag)}
+              >
+            {tag}
+                <span className="ml-2 text-gray-500 hover:text-red-600">×</span>
+          </span>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Task List */}
+        <div className="w-full max-w-2xl space-y-4">
+          {filteredTasks.map((task) => (
+              <TaskComponent
+                  key={task.id}
+                  task={task}
+                  onTagClick={toggleTag}
+              />
+          ))}
+        </div>
+      </div>
   );
-}
+};
+
+// Wrap the app with the Router
+const RootApp: React.FC = () => (
+    <Router>
+      <App />
+    </Router>
+);
+
+export default RootApp;

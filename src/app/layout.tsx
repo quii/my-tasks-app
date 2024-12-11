@@ -24,11 +24,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
+    <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    >
+    <h1 className="text-3xl font-bold underline"><s>Snapp</s> Combine</h1>
+    {children}
+    </body>
     </html>
   );
 }
